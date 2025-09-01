@@ -294,10 +294,6 @@
             loadingState.style.display = 'none';
             resultContent.style.display = 'block';
             
-            // Store in localStorage (remove previous and save new)
-            localStorage.removeItem('previousResult');
-            localStorage.setItem('latestResult', JSON.stringify(data));
-            
             // Display raw JSON with syntax highlighting
             jsonDisplay.innerHTML = formatJSON(data);
         }
@@ -337,32 +333,12 @@
             });
         }
         
-        // Load previous results from localStorage if available
-        function loadPreviousResults() {
-            const savedResult = localStorage.getItem('latestResult');
-            if (savedResult) {
-                try {
-                    const data = JSON.parse(savedResult);
-                    if (data) {
-                        displayResults(data);
-                        return true;
-                    }
-                } catch (error) {
-                    console.error('Error parsing saved result:', error);
-                }
-            }
-            return false;
-        }
+
         
         // Start polling when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            // Try to load previous results first
-            const hasPreviousResults = loadPreviousResults();
-            
-            // If no previous results, start polling
-            if (!hasPreviousResults) {
-                startPolling();
-            }
+            // Start polling immediately
+            startPolling();
             
             // Stop polling after 10 minutes
             setTimeout(() => {
