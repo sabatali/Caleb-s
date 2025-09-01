@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue Equinox - Email Sequence Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result-link {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .result-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Blue Equinox</h1>
+            <p>Generate AI-Powered Email Sequences</p>
+        </div>
+        
+        <form id="emailForm">
+            <div class="form-group">
+                <label for="prompt">Email Sequence Prompt:</label>
+                <textarea 
+                    id="prompt" 
+                    name="prompt" 
+                    placeholder="Enter your prompt for generating email sequences..."
+                    required
+                >You are an outbound growth consultant for Blue Equinox. Your task is to generate a full 9-email sequence plus a LinkedIn message that combines a sophisticated, value-driven cadence with deep, human-sounding personalization.
+
+Guardrails:
+- DO NOT ask for permission to send a link (provide links directly)
+- DO NOT use cliché sales phrases ("touching base," "just checking in")
+- DO NOT use overly formal or apologetic language. Tone should be confident and peer-to-peer
+- Each email must have a single clear CTA
+- Every new thread (Email 1, Email 4, Email 7) must open with a personalized observation using provided prospect/company/context data
+
+Core Offers & Assets:
+- Primary Offer: "No-Cost Engine" (IPA model) for a 9-person growth team
+- 4-Pillar System: People, Tools, Services, White-Labeling
+- Assets: Whitepaper (IPA financing model), E-Book ("MSP Growth Playbook"), Blog: "Why Most MSP Marketing Falls Short", Blog: "MSP Sales Best Practices"
+- Proof Points: EBITDA case study, partner ecosystem (Coro, Actifile, etc.)
+
+Structure:
+Part 1: Thread 1 (Emails 1–3)
+- Personalized hook + IPA Whitepaper (50–70 words)
+- Pipeline outcome benefit (60–90 words)
+- Financial proof via EBITDA case study (70–100 words)
+
+Part 2: Thread 2 (Emails 4–6)
+- Personalized hook + Deep Dive (Pillars 1 & 2) + E-Book (100–130 words)
+- Deep Dive (Pillars 3 & 4) (90–120 words)
+- Ecosystem & credibility (80–110 words)
+
+Part 3: Standalone (Emails 7–9)
+- Personalized marketing angle + Marketing Blog (50–70 words)
+- Personalized sales angle + Sales Blog (50–70 words)
+- Recap all resources + gentle close (70–100 words)
+
+LinkedIn Message:
+- One short, conversational LinkedIn note that references the prospect's post or role, introduces the "No-Cost Engine," and drops one direct resource link.
+
+Output Requirement:
+Return results in the following JSON structure (fill in fields with generated text):
+{
+  "emails": [
+    { "id": 1, "subject": "", "body": "" },
+    { "id": 2, "subject": "", "body": "" },
+    { "id": 3, "subject": "", "body": "" },
+    { "id": 4, "subject": "", "body": "" },
+    { "id": 5, "subject": "", "body": "" },
+    { "id": 6, "subject": "", "body": "" },
+    { "id": 7, "subject": "", "body": "" },
+    { "id": 8, "subject": "", "body": "" },
+    { "id": 9, "subject": "", "body": "" }
+  ],
+  "linkedin_message": {
+    "body": ""
+  }
+}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="linkedUrl">LinkedIn Profile URL:</label>
+                <input 
+                    type="text" 
+                    id="linkedUrl" 
+                    name="linkedUrl" 
+                    placeholder="https://linkedin.com/in/username"
+                    value="linkedin.com/in/nimracontentdesigner/"
+                    required
+                >
+            </div>
+            
+            <button type="submit" class="btn" id="submitBtn">
+                🚀 Generate Email Sequence
+            </button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Generating your email sequence...</p>
+        </div>
+        
+        <div class="result-link" id="resultLink">
+            <p>✅ Email sequence generated! <a href="/result" target="_blank">View Results</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('emailForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const resultLink = document.getElementById('resultLink');
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Generating...';
+            loading.style.display = 'block';
+            resultLink.style.display = 'none';
+            
+            try {
+                const formData = new FormData(this);
+                const data = {
+                    prompt: formData.get('prompt'),
+                    linkedUrl: formData.get('linkedUrl')
+                };
+                
+                const response = await fetch('/webhook', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultLink.style.display = 'block';
+                    // Start polling for results
+                    pollForResults();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while generating the email sequence.');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 Generate Email Sequence';
+                loading.style.display = 'none';
+            }
+        });
+        
+        function pollForResults() {
+            const checkInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('/latest-result');
+                    const result = await response.json();
+                    
+                    if (result && result.emails) {
+                        clearInterval(checkInterval);
+                        // Redirect to result page
+                        window.location.href = '/result';
+                    }
+                } catch (error) {
+                    console.error('Error polling for results:', error);
+                }
+            }, 2000); // Check every 2 seconds
+            
+            // Stop polling after 5 minutes
+            setTimeout(() => {
+                clearInterval(checkInterval);
+            }, 300000);
+        }
+    </script>
+</body>
+</html>
