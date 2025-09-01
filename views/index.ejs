@@ -304,6 +304,27 @@ Return results in the following JSON structure (fill in fields with generated te
                         >
                     </div>
                     
+                    <div class="form-group">
+                        <label for="model">AI Model:</label>
+                        <input 
+                            type="text" 
+                            id="model" 
+                            name="model" 
+                            list="models"
+                            placeholder="Select AI model..."
+                            value="gpt-4o-mini"
+                            required
+                        >
+                        <datalist id="models">
+                            <option value="gpt-4o-mini">
+                            <option value="gpt-4.1">
+                            <option value="gpt-4">
+                            <option value="gpt-3.5-turbo">
+                            <option value="claude-3-haiku">
+                            <option value="claude-3-sonnet">
+                        </datalist>
+                    </div>
+                    
                     <button type="submit" class="btn" id="submitBtn">
                         🚀 Generate Email Sequence
                     </button>
@@ -331,7 +352,7 @@ Return results in the following JSON structure (fill in fields with generated te
                 </div>
                 
                 <div class="actions">
-                    <button class="btn btn-secondary" onclick="window.print()">🖨️ Print Results</button>
+                    <!-- <button class="btn btn-secondary" onclick="window.print()">🖨️ Print Results</button> -->
                 </div>
             </div>
         </div>
@@ -354,11 +375,17 @@ Return results in the following JSON structure (fill in fields with generated te
             submitBtn.disabled = true;
             submitBtn.textContent = 'Generating...';
             
+            // Clear any existing polling
+            if (pollInterval) {
+                clearInterval(pollInterval);
+            }
+            
             try {
                 const formData = new FormData(this);
                 const data = {
                     prompt: formData.get('prompt'),
-                    linkedUrl: formData.get('linkedUrl')
+                    linkedUrl: formData.get('linkedUrl'),
+                    model: formData.get('model')
                 };
                 
                 const response = await fetch('/webhook', {
@@ -398,7 +425,7 @@ Return results in the following JSON structure (fill in fields with generated te
                     const response = await fetch('/latest-result');
                     const result = await response.json();
                     
-                    if (result) {
+                    if (result && result !== null) {
                         clearInterval(pollInterval);
                         displayResults(result);
                     }
