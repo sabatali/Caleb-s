@@ -46,100 +46,17 @@ app.get('/api/hello', (req, res) => {
 // Webhook endpoint for n8n integration
 app.post('/webhook', async (req, res) => {
     try {
-        // const { prompt, linkedUrl } = req.body;
+
+
+        const { prompt, linkedUrl } = req.body;
 
         // Validate required fields
-        // if (!prompt || !linkedUrl) {
-        //     return res.status(400).json({
-        //         error: 'Both prompt and linkedUrl are required',
-        //         received: { prompt, linkedUrl }
-        //     });
-        // }
-
-        const prompt = `
-You are an outbound growth consultant for Blue Equinox. Your task is to generate a full 9-email sequence plus a LinkedIn message that combines a sophisticated, value-driven cadence with deep, human-sounding personalization.
-Guardrails
-DO NOT ask for permission to send a link (provide links directly).
-
-
-DO NOT use cliché sales phrases ("touching base," "just checking in").
-
-
-DO NOT use overly formal or apologetic language. Tone should be confident and peer-to-peer.
-
-
-Each email must have a single clear CTA.
-
-
-Every new thread (Email 1, Email 4, Email 7) must open with a personalized observation using provided prospect/company/context data.
-
-
-Core Offers & Assets
-Primary Offer: "No-Cost Engine" (IPA model) for a 9-person growth team.
-
-
-4-Pillar System: People, Tools, Services, White-Labeling.
-
-
-Assets:
-
-
-Whitepaper (IPA financing model)
-
-
-E-Book ("MSP Growth Playbook")
-
-
-Blog: "Why Most MSP Marketing Falls Short"
-
-
-Blog: "MSP Sales Best Practices"
-
-
-Proof Points: EBITDA case study, partner ecosystem (Coro, Actifile, etc.).
-
-
-Structure
-Part 1: Thread 1 (Emails 1–3)
-Personalized hook + IPA Whitepaper (50–70 words)
-
-
-Pipeline outcome benefit (60–90 words)
-
-
-Financial proof via EBITDA case study (70–100 words)
-
-
-Part 2: Thread 2 (Emails 4–6)
- 4. Personalized hook + Deep Dive (Pillars 1 & 2) + E-Book (100–130 words)
- 5. Deep Dive (Pillars 3 & 4) (90–120 words)
- 6. Ecosystem & credibility (80–110 words)
-Part 3: Standalone (Emails 7–9)
- 7. Personalized marketing angle + Marketing Blog (50–70 words)
- 8. Personalized sales angle + Sales Blog (50–70 words)
- 9. Recap all resources + gentle close (70–100 words)
-LinkedIn Message:
- One short, conversational LinkedIn note that references the prospect’s post or role, introduces the “No-Cost Engine,” and drops one direct resource link.
-Output Requirement
-Return results in the following JSON structure (fill in fields with generated text):
-{
-  "emails": [
-    { "id": 1, "subject": "", "body": "" },
-    { "id": 2, "subject": "", "body": "" },
-    { "id": 3, "subject": "", "body": "" },
-    { "id": 4, "subject": "", "body": "" },
-    { "id": 5, "subject": "", "body": "" },
-    { "id": 6, "subject": "", "body": "" },
-    { "id": 7, "subject": "", "body": "" },
-    { "id": 8, "subject": "", "body": "" },
-    { "id": 9, "subject": "", "body": "" }
-  ],
-  "linkedin_message": {
-    "body": ""
-  }
-}
-        `;
-        const linkedUrl = "linkedin.com/in/nimracontentdesigner/"
+        if (!prompt || !linkedUrl) {
+            return res.status(400).json({
+                error: 'Both prompt and linkedUrl are required',
+                received: { prompt, linkedUrl }
+            });
+        }
 
         console.log('📥 Received webhook data:', { prompt, linkedUrl });
 
