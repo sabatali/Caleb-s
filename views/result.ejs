@@ -181,17 +181,23 @@
             box-shadow: 0 10px 20px rgba(108, 117, 125, 0.3);
         }
         
-        .json-display {
-            background: #2d3748;
-            color: #e2e8f0;
-            padding: 20px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            overflow-x: auto;
-            white-space: pre-wrap;
-            margin-top: 20px;
-        }
+                 .json-display {
+             background: #2d3748;
+             color: #e2e8f0;
+             padding: 20px;
+             border-radius: 8px;
+             font-family: 'Courier New', monospace;
+             font-size: 0.9em;
+             overflow-x: auto;
+             white-space: pre-wrap;
+             margin-top: 20px;
+         }
+         
+         .json-display .string { color: #a7f3d0; }
+         .json-display .number { color: #fbbf24; }
+         .json-display .boolean { color: #f472b6; }
+         .json-display .null { color: #9ca3af; }
+         .json-display .key { color: #60a5fa; }
         
         .copy-btn {
             background: #28a745;
@@ -293,45 +299,76 @@
             }, 2000); // Check every 2 seconds
         }
         
-        function displayResults(data) {
-            const loadingState = document.getElementById('loadingState');
-            const resultContent = document.getElementById('resultContent');
-            const emailsContainer = document.getElementById('emailsContainer');
-            const linkedinMessage = document.getElementById('linkedinMessage');
-            const jsonDisplay = document.getElementById('jsonDisplay');
-            
-            // Hide loading, show results
-            loadingState.style.display = 'none';
-            resultContent.style.display = 'block';
-            
-            // Display emails
-            emailsContainer.innerHTML = '';
-            data.emails.forEach(email => {
-                const emailCard = document.createElement('div');
-                emailCard.className = 'email-card';
-                emailCard.innerHTML = `
-                    <div class="email-header">
-                        <span class="email-id">Email ${email.id}</span>
-                        <div class="email-subject">${email.subject || 'No Subject'}</div>
-                    </div>
-                    <div class="email-body">${email.body || 'No content'}</div>
-                `;
-                emailsContainer.appendChild(emailCard);
-            });
-            
-            // Display LinkedIn message
-            if (data.linkedin_message && data.linkedin_message.body) {
-                linkedinMessage.textContent = data.linkedin_message.body;
-            } else {
-                linkedinMessage.textContent = 'No LinkedIn message generated';
-            }
-            
-            // Display raw JSON
-            jsonDisplay.textContent = JSON.stringify(data, null, 2);
-        }
+                 function displayResults(data) {
+             const loadingState = document.getElementById('loadingState');
+             const resultContent = document.getElementById('resultContent');
+             const emailsContainer = document.getElementById('emailsContainer');
+             const linkedinMessage = document.getElementById('linkedinMessage');
+             const jsonDisplay = document.getElementById('jsonDisplay');
+             
+             // Hide loading, show results
+             loadingState.style.display = 'none';
+             resultContent.style.display = 'block';
+             
+             // Store in localStorage (remove previous and save new)
+             localStorage.removeItem('previousResult');
+             localStorage.setItem('latestResult', JSON.stringify(data));
+             
+             // Display emails
+             emailsContainer.innerHTML = '';
+             if (data.emails && Array.isArray(data.emails)) {
+                 data.emails.forEach(email => {
+                     const emailCard = document.createElement('div');
+                     emailCard.className = 'email-card';
+                     emailCard.innerHTML = `
+                         <div class="email-header">
+                             <span class="email-id">Email ${email.id}</span>
+                             <div class="email-subject">${email.subject || 'No Subject'}</div>
+                         </div>
+                         <div class="email-body">${email.body || 'No content'}</div>
+                     `;
+                     emailsContainer.appendChild(emailCard);
+                 });
+             } else {
+                 emailsContainer.innerHTML = '<div class="email-card"><div class="email-body">No emails found in the response</div></div>';
+             }
+             
+             // Display LinkedIn message
+             if (data.linkedin_message && data.linkedin_message.body) {
+                 linkedinMessage.textContent = data.linkedin_message.body;
+             } else {
+                 linkedinMessage.textContent = 'No LinkedIn message generated';
+             }
+             
+             // Display raw JSON with syntax highlighting
+             jsonDisplay.innerHTML = formatJSON(data);
+         }
+         
+         function formatJSON(obj) {
+             return JSON.stringify(obj, null, 2)
+                 .replace(/&/g, '&amp;')
+                 .replace(/</g, '&lt;')
+                 .replace(/>/g, '&gt;')
+                 .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                     var cls = 'number';
+                     if (/^"/.test(match)) {
+                         if (/:$/.test(match)) {
+                             cls = 'key';
+                         } else {
+                             cls = 'string';
+                         }
+                     } else if (/true|false/.test(match)) {
+                         cls = 'boolean';
+                     } else if (/null/.test(match)) {
+                         cls = 'null';
+                     }
+                     return '<span class="' + cls + '">' + match + '</span>';
+                 });
+         }
         
         function copyToClipboard() {
-            const jsonText = document.getElementById('jsonDisplay').textContent;
+            const jsonDisplay = document.getElementById('jsonDisplay');
+            const jsonText = jsonDisplay.textContent || jsonDisplay.innerText;
             navigator.clipboard.writeText(jsonText).then(() => {
                 const btn = document.querySelector('.copy-btn');
                 const originalText = btn.textContent;
@@ -342,20 +379,45 @@
             });
         }
         
+        // Load previous results from localStorage if available
+        function loadPreviousResults() {
+            const savedResult = localStorage.getItem('latestResult');
+            if (savedResult) {
+                try {
+                    const data = JSON.parse(savedResult);
+                    if (data && data.emails) {
+                        displayResults(data);
+                        return true;
+                    }
+                } catch (error) {
+                    console.error('Error parsing saved result:', error);
+                }
+            }
+            return false;
+        }
+        
         // Start polling when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            startPolling();
+            // Try to load previous results first
+            const hasPreviousResults = loadPreviousResults();
+            
+            // If no previous results, start polling
+            if (!hasPreviousResults) {
+                startPolling();
+            }
             
             // Stop polling after 10 minutes
             setTimeout(() => {
                 if (pollInterval) {
                     clearInterval(pollInterval);
                     const loadingState = document.getElementById('loadingState');
-                    loadingState.innerHTML = `
-                        <h3>⏰ Timeout</h3>
-                        <p>No results received within 10 minutes. Please try again.</p>
-                        <a href="/form" class="btn" style="margin-top: 20px;">🔄 Try Again</a>
-                    `;
+                    if (loadingState && loadingState.style.display !== 'none') {
+                        loadingState.innerHTML = `
+                            <h3>⏰ Timeout</h3>
+                            <p>No results received within 10 minutes. Please try again.</p>
+                            <a href="/form" class="btn" style="margin-top: 20px;">🔄 Try Again</a>
+                        `;
+                    }
                 }
             }, 600000);
         });
