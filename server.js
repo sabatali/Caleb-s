@@ -48,22 +48,26 @@ app.post('/webhook', async (req, res) => {
     try {
 
 
-        const { prompt, linkedUrl } = req.body;
+        const { prompt, linkedUrl, model } = req.body;
 
         // Validate required fields
-        if (!prompt || !linkedUrl) {
+        if (!prompt || !linkedUrl || !model) {
             return res.status(400).json({
-                error: 'Both prompt and linkedUrl are required',
-                received: { prompt, linkedUrl }
+                error: 'prompt, linkedUrl, and model are required',
+                received: { prompt, linkedUrl, model }
             });
         }
 
-        console.log('📥 Received webhook data:', { prompt, linkedUrl });
+        console.log('📥 Received webhook data:', { prompt, linkedUrl, model });
+
+        // Clear previous results when new request comes in
+        latestResult = null;
 
         // Prepare data for n8n webhook
         const webhookData = {
             prompt: prompt,
             linkedUrl: linkedUrl,
+            model: model,
             timestamp: new Date().toISOString(),
             source: 'nodejs-webhook'
         };
