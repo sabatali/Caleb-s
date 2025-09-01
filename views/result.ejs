@@ -250,21 +250,7 @@
                 </div>
                 
                 <div class="result-section">
-                    <h2 class="section-title">📧 Email Sequence (9 Emails)</h2>
-                    <div id="emailsContainer">
-                        <!-- Emails will be populated here -->
-                    </div>
-                </div>
-                
-                <div class="linkedin-section">
-                    <h3 class="linkedin-title">LinkedIn Message</h3>
-                    <div class="linkedin-message" id="linkedinMessage">
-                        <!-- LinkedIn message will be populated here -->
-                    </div>
-                </div>
-                
-                <div class="result-section">
-                    <h2 class="section-title">🔧 Raw JSON Data</h2>
+                    <h2 class="section-title">🔧 Raw Result Data</h2>
                     <button class="copy-btn" onclick="copyToClipboard()">📋 Copy JSON</button>
                     <div class="json-display" id="jsonDisplay">
                         <!-- Raw JSON will be displayed here -->
@@ -289,7 +275,7 @@
                     const response = await fetch('/latest-result');
                     const result = await response.json();
                     
-                    if (result && result.emails) {
+                    if (result) {
                         clearInterval(pollInterval);
                         displayResults(result);
                     }
@@ -299,50 +285,22 @@
             }, 2000); // Check every 2 seconds
         }
         
-                 function displayResults(data) {
-             const loadingState = document.getElementById('loadingState');
-             const resultContent = document.getElementById('resultContent');
-             const emailsContainer = document.getElementById('emailsContainer');
-             const linkedinMessage = document.getElementById('linkedinMessage');
-             const jsonDisplay = document.getElementById('jsonDisplay');
-             
-             // Hide loading, show results
-             loadingState.style.display = 'none';
-             resultContent.style.display = 'block';
-             
-             // Store in localStorage (remove previous and save new)
-             localStorage.removeItem('previousResult');
-             localStorage.setItem('latestResult', JSON.stringify(data));
-             
-             // Display emails
-             emailsContainer.innerHTML = '';
-             if (data.emails && Array.isArray(data.emails)) {
-                 data.emails.forEach(email => {
-                     const emailCard = document.createElement('div');
-                     emailCard.className = 'email-card';
-                     emailCard.innerHTML = `
-                         <div class="email-header">
-                             <span class="email-id">Email ${email.id}</span>
-                             <div class="email-subject">${email.subject || 'No Subject'}</div>
-                         </div>
-                         <div class="email-body">${email.body || 'No content'}</div>
-                     `;
-                     emailsContainer.appendChild(emailCard);
-                 });
-             } else {
-                 emailsContainer.innerHTML = '<div class="email-card"><div class="email-body">No emails found in the response</div></div>';
-             }
-             
-             // Display LinkedIn message
-             if (data.linkedin_message && data.linkedin_message.body) {
-                 linkedinMessage.textContent = data.linkedin_message.body;
-             } else {
-                 linkedinMessage.textContent = 'No LinkedIn message generated';
-             }
-             
-             // Display raw JSON with syntax highlighting
-             jsonDisplay.innerHTML = formatJSON(data);
-         }
+                         function displayResults(data) {
+            const loadingState = document.getElementById('loadingState');
+            const resultContent = document.getElementById('resultContent');
+            const jsonDisplay = document.getElementById('jsonDisplay');
+            
+            // Hide loading, show results
+            loadingState.style.display = 'none';
+            resultContent.style.display = 'block';
+            
+            // Store in localStorage (remove previous and save new)
+            localStorage.removeItem('previousResult');
+            localStorage.setItem('latestResult', JSON.stringify(data));
+            
+            // Display raw JSON with syntax highlighting
+            jsonDisplay.innerHTML = formatJSON(data);
+        }
          
          function formatJSON(obj) {
              return JSON.stringify(obj, null, 2)
@@ -385,7 +343,7 @@
             if (savedResult) {
                 try {
                     const data = JSON.parse(savedResult);
-                    if (data && data.emails) {
+                    if (data) {
                         displayResults(data);
                         return true;
                     }
