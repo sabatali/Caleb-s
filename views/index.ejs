@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue Equinox - Email Sequence Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .form-section {
+            margin-bottom: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .loading-indicator.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result-section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 20px;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #155724;
+        }
+        
+        .json-display {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            margin-top: 20px;
+        }
+        
+        .json-display .string { color: #a7f3d0; }
+        .json-display .number { color: #fbbf24; }
+        .json-display .boolean { color: #f472b6; }
+        .json-display .null { color: #9ca3af; }
+        .json-display .key { color: #60a5fa; }
+        
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        .copy-btn:hover {
+            background: #218838;
+        }
+        
+        .actions {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 10px 20px rgba(108, 117, 125, 0.3);
+        }
+        
+        .result-content {
+            display: none;
+        }
+        
+        .result-content.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Blue Equinox</h1>
+            <p>Generate AI-Powered Email Sequences</p>
+        </div>
+        
+        <div class="content">
+            <!-- Form Section -->
+            <div class="form-section">
+                <form id="emailForm">
+                    <div class="form-group">
+                        <label for="prompt">Email Sequence Prompt:</label>
+                        <textarea 
+                            id="prompt" 
+                            name="prompt" 
+                            placeholder="Enter your prompt for generating email sequences..."
+                            required
+                        >You are an outbound growth consultant for Blue Equinox. Your task is to generate a full 9-email sequence plus a LinkedIn message that combines a sophisticated, value-driven cadence with deep, human-sounding personalization.
+
+Guardrails:
+- DO NOT ask for permission to send a link (provide links directly)
+- DO NOT use cliché sales phrases ("touching base," "just checking in")
+- DO NOT use overly formal or apologetic language. Tone should be confident and peer-to-peer
+- Each email must have a single clear CTA
+- Every new thread (Email 1, Email 4, Email 7) must open with a personalized observation using provided prospect/company/context data
+
+Core Offers & Assets:
+- Primary Offer: "No-Cost Engine" (IPA model) for a 9-person growth team
+- 4-Pillar System: People, Tools, Services, White-Labeling
+- Assets: Whitepaper (IPA financing model), E-Book ("MSP Growth Playbook"), Blog: "Why Most MSP Marketing Falls Short", Blog: "MSP Sales Best Practices"
+- Proof Points: EBITDA case study, partner ecosystem (Coro, Actifile, etc.)
+
+Structure:
+Part 1: Thread 1 (Emails 1–3)
+- Personalized hook + IPA Whitepaper (50–70 words)
+- Pipeline outcome benefit (60–90 words)
+- Financial proof via EBITDA case study (70–100 words)
+
+Part 2: Thread 2 (Emails 4–6)
+- Personalized hook + Deep Dive (Pillars 1 & 2) + E-Book (100–130 words)
+- Deep Dive (Pillars 3 & 4) (90–120 words)
+- Ecosystem & credibility (80–110 words)
+
+Part 3: Standalone (Emails 7–9)
+- Personalized marketing angle + Marketing Blog (50–70 words)
+- Personalized sales angle + Sales Blog (50–70 words)
+- Recap all resources + gentle close (70–100 words)
+
+LinkedIn Message:
+- One short, conversational LinkedIn note that references the prospect's post or role, introduces the "No-Cost Engine," and drops one direct resource link.
+
+Output Requirement:
+Return results in the following JSON structure (fill in fields with generated text):
+{
+  "emails": [
+    { "id": 1, "subject": "", "body": "" },
+    { "id": 2, "subject": "", "body": "" },
+    { "id": 3, "subject": "", "body": "" },
+    { "id": 4, "subject": "", "body": "" },
+    { "id": 5, "subject": "", "body": "" },
+    { "id": 6, "subject": "", "body": "" },
+    { "id": 7, "subject": "", "body": "" },
+    { "id": 8, "subject": "", "body": "" },
+    { "id": 9, "subject": "", "body": "" }
+  ],
+  "linkedin_message": {
+    "body": ""
+  }
+}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="linkedUrl">LinkedIn Profile URL:</label>
+                        <input 
+                            type="text" 
+                            id="linkedUrl" 
+                            name="linkedUrl" 
+                            placeholder="https://linkedin.com/in/username"
+                            value="linkedin.com/in/nimracontentdesigner/"
+                            required
+                        >
+                    </div>
+                    
+                    <button type="submit" class="btn" id="submitBtn">
+                        🚀 Generate Email Sequence
+                    </button>
+                </form>
+                
+                <!-- Loading indicator at bottom of button -->
+                <div class="loading-indicator" id="loadingIndicator">
+                    <div class="spinner"></div>
+                    <p>Waiting for results from n8n...</p>
+                </div>
+            </div>
+            
+            <!-- Result Section - Only shown when there's a response -->
+            <div class="result-content" id="resultContent">
+                <div class="status" id="statusMessage">
+                    ✅ Results received from n8n workflow
+                </div>
+                
+                <div class="result-section">
+                    <h2 class="section-title">🔧 Raw Result Data</h2>
+                    <button class="copy-btn" onclick="copyToClipboard()">📋 Copy JSON</button>
+                    <div class="json-display" id="jsonDisplay">
+                        <!-- Raw JSON will be displayed here -->
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="window.print()">🖨️ Print Results</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pollInterval;
+        
+        // Form submission handler
+        document.getElementById('emailForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const resultContent = document.getElementById('resultContent');
+            
+            // Clear previous results and show loading
+            resultContent.classList.remove('show');
+            loadingIndicator.classList.add('show');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Generating...';
+            
+            try {
+                const formData = new FormData(this);
+                const data = {
+                    prompt: formData.get('prompt'),
+                    linkedUrl: formData.get('linkedUrl')
+                };
+                
+                const response = await fetch('/webhook', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Start polling for results
+                    startPolling();
+                } else {
+                    alert('Error: ' + result.error);
+                    resetForm();
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while generating the email sequence.');
+                resetForm();
+            }
+        });
+        
+        // Start polling for results
+        function startPolling() {
+            // Clear any existing polling
+            if (pollInterval) {
+                clearInterval(pollInterval);
+            }
+            
+            pollInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('/latest-result');
+                    const result = await response.json();
+                    
+                    if (result) {
+                        clearInterval(pollInterval);
+                        displayResults(result);
+                    }
+                } catch (error) {
+                    console.error('Error polling for results:', error);
+                }
+            }, 2000); // Check every 2 seconds
+            
+            // Stop polling after 10 minutes
+            setTimeout(() => {
+                if (pollInterval) {
+                    clearInterval(pollInterval);
+                    const loadingIndicator = document.getElementById('loadingIndicator');
+                    if (loadingIndicator && loadingIndicator.classList.contains('show')) {
+                        loadingIndicator.innerHTML = `
+                            <div class="spinner"></div>
+                            <p>⏰ Timeout - No results received within 10 minutes. Please try again.</p>
+                        `;
+                        resetForm();
+                    }
+                }
+            }, 600000);
+        }
+        
+        function displayResults(data) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const resultContent = document.getElementById('resultContent');
+            const jsonDisplay = document.getElementById('jsonDisplay');
+            
+            // Hide loading, show results
+            loadingIndicator.classList.remove('show');
+            resultContent.classList.add('show');
+            
+            // Display raw JSON with syntax highlighting
+            jsonDisplay.innerHTML = formatJSON(data);
+            
+            // Reset form button
+            resetForm();
+        }
+        
+        function resetForm() {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = false;
+            submitBtn.textContent = '🚀 Generate Email Sequence';
+        }
+        
+        function formatJSON(obj) {
+            return JSON.stringify(obj, null, 2)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                    var cls = 'number';
+                    if (/^"/.test(match)) {
+                        if (/:$/.test(match)) {
+                            cls = 'key';
+                        } else {
+                            cls = 'string';
+                        }
+                    } else if (/true|false/.test(match)) {
+                        cls = 'boolean';
+                    } else if (/null/.test(match)) {
+                        cls = 'null';
+                    }
+                    return '<span class="' + cls + '">' + match + '</span>';
+                });
+        }
+        
+        function copyToClipboard() {
+            const jsonDisplay = document.getElementById('jsonDisplay');
+            const jsonText = jsonDisplay.textContent || jsonDisplay.innerText;
+            navigator.clipboard.writeText(jsonText).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -14,7 +14,7 @@ app.use(express.static('public'));
 
 // Routes
 app.get('/', (req, res) => {
-    res.render('form');
+    res.render('index');
 });
 
 app.get('/form', (req, res) => {
