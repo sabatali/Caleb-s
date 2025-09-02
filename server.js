@@ -141,19 +141,30 @@ app.post('/api/data', (req, res) => {
 let latestResult = null;
 
 app.post("/n8n-result", (req, res) => {
-    console.log("✅ Got result from n8n ======================== ============================")
+    const timestamp = new Date().toISOString();
+    console.log(`✅ Got result from n8n [${timestamp}] ======================== ============================`)
     console.log("✅ Got result from n8n =======================:", req.body);
     console.log("✅ Got result from n8n ======================== ============================")
 
-    // Store the result
-    latestResult = req.body;
+    // Only store non-empty results
+    if (req.body && Object.keys(req.body).length > 0) {
+        console.log("📝 Storing result (non-empty)");
+        latestResult = req.body;
+    } else {
+        console.log("⚠️ Ignoring empty result");
+    }
 
     // You can store result in DB, notify frontend, etc.
     res.json({ received: true });
 });
 
 app.get('/latest-result', (req, res) => {
-    res.json(latestResult);
+    console.log('📤 Serving latest result:', latestResult ? 'Found result' : 'No result stored');
+    res.json({
+        hasResult: latestResult !== null,
+        result: latestResult,
+        timestamp: new Date().toISOString()
+    });
 });
 
 
