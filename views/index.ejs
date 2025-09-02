@@ -439,7 +439,7 @@ Return results in the following JSON structure (fill in fields with generated te
                 }
             }, 2000); // Check every 2 seconds
             
-            // Stop polling after 10 minutes
+            // Stop polling after 15 minutes
             setTimeout(() => {
                 if (pollInterval) {
                     clearInterval(pollInterval);
@@ -452,7 +452,7 @@ Return results in the following JSON structure (fill in fields with generated te
                         resetForm();
                     }
                 }
-            }, 600000);
+            }, 900000);
         }
         
         function displayResults(data) {
