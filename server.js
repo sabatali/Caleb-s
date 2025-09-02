@@ -74,8 +74,8 @@ app.post('/webhook', async (req, res) => {
         console.log("🚀 ~ webhookData:", webhookData)
 
         // Forward to n8n webhook
-        const n8nWebhookUrl = 'https://blueequinox.app.n8n.cloud/webhook-test/test'; // Test
-        // const n8nWebhookUrl = 'https://blueequinox.app.n8n.cloud/webhook/test';     // production
+        //const n8nWebhookUrl = 'https://blueequinox.app.n8n.cloud/webhook-test/test'; // Test
+        const n8nWebhookUrl = 'https://blueequinox.app.n8n.cloud/webhook/test';     // production
 
         console.log('🔄 Forwarding to n8n webhook:', n8nWebhookUrl);
         console.log('📤 Sending data:', JSON.stringify(webhookData, null, 2));
